@@ -100,28 +100,42 @@ def max_moves(board, player):
     """Returns a list of tuples (x, y) representing the moves that have
        the highest evaluation score for the given player."""
     possiblemoves = []
+    possiblescores = []
     tried= []
 
+    # this is needed for the useless optimization
     enemy = None
-    if player == "●":
-        enemy = "○"
+    if player == black:
+        enemy = white
     else:
-        enemy = "●"
+        enemy = black
 
     # we need to get every possible move for our turn
+    # this loop is optimized to only search through fresh tiles adjacent to enemy tiles
+    # the optimization doesn't matter that much since the board is only 7x7
+    # but in theory it should be possible to run this on much bigger boards
     for i in range(0, len(board)):
         for j in range(0, len(board[i])):
             if board[i][j] == enemy:
+                # we check the adjacent tiles
                 for x, y in directions:
+                    # only try the adjacent coordinates if we haven't tried them before
                     if (j+x, i+y) not in tried:
+                        # check if we're inside the board and that the tile is not filled
                         if on_board(j+x, i+y) and board[i+y][j+x] == " ":
                             bboard = copy.deepcopy(board)
+                            # do the actual check
                             if play(bboard, player, j+x, i+y) == True:
-                                possiblemoves.append(((j+x, i+y), evaluate(bboard)))
+                                possiblemoves.append(((j+x, i+y)))
+                                possiblescores.append(evaluate(bboard))
                             tried.append((j+x, i+y))
-
-    return list(map(lambda x : x[0], filter(lambda x: max(possiblemoves, key = lambda y : y[1])[1] == x[1], possiblemoves)))
-
+    # this used to be a "clever" single line return statement
+    ret = []
+    for i in range(len(possiblescores)):
+        if ((player == black and possiblescores[i] == max(possiblescores)) or
+            (player == white and possiblescores[i] == min(possiblescores))):
+            ret.append(possiblemoves[i])
+    return ret
 
 def minimax_moves(board, player):
     """Returns a list of tuples (x, y) representing the moves that give
