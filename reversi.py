@@ -3,6 +3,7 @@
 import random
 import time
 import copy
+import itertools
 
 board = [[" ", " ", " ", " ", " ", " ", " ", " "],
          [" ", " ", " ", " ", " ", " ", " ", " "],
@@ -13,9 +14,23 @@ board = [[" ", " ", " ", " ", " ", " ", " ", " "],
          [" ", " ", " ", " ", " ", " ", " ", " "],
          [" ", " ", " ", " ", " ", " ", " ", " "]]
 
+
+
+testboard = [[" ", " ", " ", " ", " ", " ", " ", " "],
+            [" ", " ", " ", " ", " ", " ", " ", " "],
+            [" ", " ", " ", " ", " ", " ", " ", " "],
+            [" ", " ", "●", "●", "●", " ", " ", " "],
+            [" ", " ", "○", "○", "○", " ", " ", " "],
+            [" ", " ", " ", " ", "●", " ", " ", " "],
+            [" ", " ", " ", " ", " ", " ", " ", " "],
+            [" ", " ", " ", " ", " ", " ", " ", " "]]
+
 # 8 directions to check for flipping other player's pieces
 directions = [(1, 0), (1, 1), (0, 1), (-1, 1),
                 (-1, 0), (-1, -1), (0, -1), (1, -1)]
+
+black = "●"
+white = "○"
 
 def display(board):
     """Prints out a formatted version of board."""
@@ -75,8 +90,7 @@ def evaluate(board):
        A score of zero indicates a neutral position.
        A positive score indicates that black is winning.
        A negative score indicates that white is winning."""
-    b = 0
-    w = 0
+    b, w = 0, 0
     for row in board:
         b += row.count("●")
         w += row.count("○")
@@ -86,7 +100,7 @@ def max_moves(board, player):
     """Returns a list of tuples (x, y) representing the moves that have
        the highest evaluation score for the given player."""
     possiblemoves = []
-    maxmoves = []
+    tried= []
 
     enemy = None
     if player == "●":
@@ -99,12 +113,15 @@ def max_moves(board, player):
         for j in range(0, len(board[i])):
             if board[i][j] == enemy:
                 for x, y in directions:
-                    if on_board(j+x, i+y) and board[i+y][j+x] == " ":
-                        bboard = copy.deepcopy(board)
-                        if play(bboard, player, j+x, i+y) == True:
-                            possiblemoves.append((j+x, i+y))
-                    
-    return maxmoves
+                    if (j+x, i+y) not in tried:
+                        if on_board(j+x, i+y) and board[i+y][j+x] == " ":
+                            bboard = copy.deepcopy(board)
+                            if play(bboard, player, j+x, i+y) == True:
+                                possiblemoves.append(((j+x, i+y), evaluate(bboard)))
+                            tried.append((j+x, i+y))
+
+    return list(map(lambda x : x[0], filter(lambda x: max(possiblemoves, key = lambda y : y[1])[1] == x[1], possiblemoves)))
+
 
 def minimax_moves(board, player):
     """Returns a list of tuples (x, y) representing the moves that give
@@ -113,26 +130,23 @@ def minimax_moves(board, player):
 
 # -----------------------
 # -----------------------
-
-current_player = "●"
-while True:
-    if current_player == "●":
-        moves = max_moves(board, current_player)
-    else:
-        moves = minimax_moves(board, current_player)
-    if moves == []:
-        break
-    else:
-        # Play a random move from the best moves
-        x, y = random.choice(moves)
-        play(board, current_player, x, y)
-        current_player = next_player(current_player)
-        time.sleep(0.5)
+def main():
+    current_player = "●"
+    while True:
+        if current_player == "●":
+            moves = max_moves(board, current_player)
+        else:
+            moves = minimax_moves(board, current_player)
+        if moves == []:
+            break
+        else:
+            # Play a random move from the best moves
+            x, y = random.choice(moves)
+            play(board, current_player, x, y)
+            current_player = next_player(current_player)
+            time.sleep(0.5)
         
     
+if __name__ == "__main__":
+    main()
 
-
-
-                
-    
-    
