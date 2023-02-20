@@ -1,4 +1,5 @@
 
+
 # Reversi AI
 
 import random
@@ -138,6 +139,7 @@ def max_moves(board, player):
        the highest evaluation score for the given player."""
     moves, scores = get_moves(board, player)
 
+    # we can't do any moves :(
     if len(moves) == 0:
         return []
 
@@ -159,7 +161,7 @@ def minimax_moves(board, player):
     target_func = min if enemy == black else max
     
     # the moves that we can make
-    moves = get_moves(board, player)[0]
+    moves = get_moves(board, player)[0] # we don't need the scores
 
     # the scores that the enemy will have after our move
     scores = []
@@ -169,7 +171,7 @@ def minimax_moves(board, player):
         # play our move
         play(bboard, player, move[0], move[1])
 
-        # the enemy's best move
+        # the enemy's best moves
         enemy_moves = max_moves(bboard, enemy)
 
         # the enemy is not able to move after this turn
@@ -183,7 +185,78 @@ def minimax_moves(board, player):
         play(bboard, get_enemy(player), enemy_move[0], enemy_move[1])
         scores.append(evaluate(bboard))
 
+    # return all the moves that we can make that will yield the lowest score for our enemy in the next move
     return list(filter(lambda x : scores.index(target_func(scores)) == moves.index(x), moves))
+
+def minimax_smart(board, player, n = 4):
+    """A recursive implementation of the minimax algorithm that looks
+       up to n moves into the future"""
+    
+    enemy = get_enemy(player)
+
+    target_func = max if enemy == black else min
+
+    # our best moves
+    moves = minimax_moves(board, player)
+    
+    if n < 1:
+        if len(moves) > 0:
+            bboard = copy.deepcopy(board)
+            play(bboard, player, moves[0][0], moves[0][1])
+            enemy_moves = minimax_moves(bboard, enemy)
+            play(bboard, enemy, enemy_moves[0][0], enemy_moves[0][1])
+            return [moves[0], evaluate(bboard)]
+        else:
+            return []
+    
+    tree = []
+    for move in moves:
+        bboard = copy.deepcopy(board)
+        play(bboard, player, move[0], move[1])
+
+        enemy_moves = minimax_moves(bboard, enemy)
+
+        if len(enemy_moves) == 0 and n < 1:
+            return [move]
+
+        enemy_move = enemy_moves[0]
+        
+        play(bboard, enemy, enemy_move[0], enemy_move[1])
+
+        tree.append([move, evaluate(bboard)])
+        tree.append(minimax_smart(bboard, player, n - 1))
+    if len(tree) == 0:
+        return []
+
+    selected = target_func(filter(lambda k : len(k) == 2, tree), key = lambda x : x[1])[0]
+    if type(selected) == tuple:
+        return [selected]
+    else:
+        return selected
+
+def algo_test(algo1, algo2, n = 50):
+    """Runs a game between algo1 and algo2 n times and returns the win / loss ration for algo1"""
+    wins = 0
+    for i in range(n):
+        current_board = copy.deepcopy(board)
+        current_player = black
+        while True:
+            if current_player == black:
+                moves = algo1(current_board, black)
+            else:
+                moves = algo2(current_board, white)
+            if moves == []:
+                if evaluate(current_board) > 0:
+                    wins += 1
+                break
+            else:
+                x, y = random.choice(moves)
+                play(current_board, current_player, x, y)
+                current_player = next_player(current_player)
+    if wins != n:
+        return wins / (n - wins)
+    else:
+        return wins
 
 # -----------------------
 # -----------------------
@@ -192,7 +265,8 @@ def main():
     while True:
         display(board)
         if current_player == "●":
-            moves = max_moves(board, current_player)
+            # moves = max_moves(board, current_player)
+            moves = minimax_smart(board, current_player)
         else:
             moves = minimax_moves(board, current_player)
         if moves == []:
@@ -213,5 +287,6 @@ def main():
         
     
 if __name__ == "__main__":
-    main()
+    print(minimax_smart(testboard, black))
+    # main()
 
