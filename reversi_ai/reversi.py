@@ -191,54 +191,10 @@ def minimax_moves(board, player):
 def minimax_smart(board, player, n = 4):
     """A recursive version of the minimax algorithm that looks
        up to n moves into the future. it is a bit slow"""
-    
-    enemy = get_enemy(player)
-
-    target_func = max if enemy == black else min
-
-    # our best moves
-    moves = minimax_moves(board, player)
-    
-    if n < 1:
-        if len(moves) > 0:
-            bboard = copy.deepcopy(board)
-            play(bboard, player, moves[0][0], moves[0][1])
-
-            enemy_moves = minimax_moves(bboard, enemy)
-            if len(enemy_moves) > 0:
-                play(bboard, enemy, enemy_moves[0][0], enemy_moves[0][1])
-            return [moves[0], evaluate(bboard)]
-        else:
-            return []
-    
-    tree = []
-    for move in moves:
-        bboard = copy.deepcopy(board)
-        play(bboard, player, move[0], move[1])
-
-        enemy_moves = minimax_moves(bboard, enemy)
-
-        if len(enemy_moves) == 0: #n < 1:
-            return [move]
-
-        enemy_move = enemy_moves[0]
-        
-        play(bboard, enemy, enemy_move[0], enemy_move[1])
-
-        tree.append([move, evaluate(bboard)])
-        tree.append(minimax_smart(bboard, player, n - 1))
-        
-    if len(tree) == 0:
-        return []
-
-    selected = target_func(filter(lambda k : len(k) == 2, tree), key = lambda x : x[1])[0]
-    if type(selected) == tuple:
-        return [selected]
-    else:
-        return selected
+    pass
 
 def algo_test(algo1, algo2, n = 50):
-    """Runs a game between algo1 and algo2 n times and returns the win / loss ration for algo1"""
+    """Runs a game between algo1 and algo2 n times and prints the win / loss ration for algo1"""
     wins = 0
     for i in range(n):
         current_board = copy.deepcopy(board)
@@ -257,9 +213,9 @@ def algo_test(algo1, algo2, n = 50):
                 play(current_board, current_player, x, y)
                 current_player = next_player(current_player)
     if wins != n:
-        return wins / (n - wins)
+        print(wins / (n - wins), str(wins / n * 100) + "%")
     else:
-        return wins
+        print(wins)
 
 # -----------------------
 # -----------------------
