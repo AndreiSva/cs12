@@ -189,8 +189,8 @@ def minimax_moves(board, player):
     return list(filter(lambda x : scores.index(target_func(scores)) == moves.index(x), moves))
 
 def minimax_smart(board, player, n = 4):
-    """A recursive implementation of the minimax algorithm that looks
-       up to n moves into the future"""
+    """A recursive version of the minimax algorithm that looks
+       up to n moves into the future. it is a bit slow"""
     
     enemy = get_enemy(player)
 
@@ -203,8 +203,10 @@ def minimax_smart(board, player, n = 4):
         if len(moves) > 0:
             bboard = copy.deepcopy(board)
             play(bboard, player, moves[0][0], moves[0][1])
+
             enemy_moves = minimax_moves(bboard, enemy)
-            play(bboard, enemy, enemy_moves[0][0], enemy_moves[0][1])
+            if len(enemy_moves) > 0:
+                play(bboard, enemy, enemy_moves[0][0], enemy_moves[0][1])
             return [moves[0], evaluate(bboard)]
         else:
             return []
@@ -216,7 +218,7 @@ def minimax_smart(board, player, n = 4):
 
         enemy_moves = minimax_moves(bboard, enemy)
 
-        if len(enemy_moves) == 0 and n < 1:
+        if len(enemy_moves) == 0: #n < 1:
             return [move]
 
         enemy_move = enemy_moves[0]
@@ -225,6 +227,7 @@ def minimax_smart(board, player, n = 4):
 
         tree.append([move, evaluate(bboard)])
         tree.append(minimax_smart(bboard, player, n - 1))
+        
     if len(tree) == 0:
         return []
 
