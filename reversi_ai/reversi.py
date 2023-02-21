@@ -1,6 +1,5 @@
-
-
 # Reversi AI
+# By Andrei Sova
 
 import random
 import time
@@ -16,14 +15,12 @@ board = [[" ", " ", " ", " ", " ", " ", " ", " "],
          [" ", " ", " ", " ", " ", " ", " ", " "],
          [" ", " ", " ", " ", " ", " ", " ", " "]]
 
-
-
 testboard = [[" ", " ", " ", " ", " ", " ", " ", " "],
             [" ", " ", " ", " ", " ", " ", " ", " "],
-            [" ", " ", " ", " ", " ", " ", " ", " "],
+            [" ", " ", "●", " ", " ", " ", " ", " "],
             [" ", " ", "●", "●", "●", " ", " ", " "],
-            [" ", " ", "○", "○", "○", " ", " ", " "],
-            [" ", " ", " ", " ", "●", " ", " ", " "],
+            [" ", " ", " ", "○", "○", " ", " ", " "],
+            [" ", " ", " ", "○", " ", " ", " ", " "],
             [" ", " ", " ", " ", " ", " ", " ", " "],
             [" ", " ", " ", " ", " ", " ", " ", " "]]
 
@@ -186,12 +183,35 @@ def minimax_moves(board, player):
         scores.append(evaluate(bboard))
 
     # return all the moves that we can make that will yield the lowest score for our enemy in the next move
-    return list(filter(lambda x : scores.index(target_func(scores)) == moves.index(x), moves))
+    indexes = map(moves.index, moves)
+    return list(map(lambda x : moves[x] if scores[x] == target_func(scores) else None, range(len(moves))))
 
 def minimax_smart(board, player, n = 4):
     """A recursive version of the minimax algorithm that looks
        up to n moves into the future. it is a bit slow"""
-    pass
+
+    enemy = get_enemy(player)
+    target_func = max if enemy == black else min
+    moves = minimax_moves(board, player)
+    print(moves)
+    if n < 1:
+        print("doing", moves)
+        return moves # something
+
+    tree = []
+    for move in moves:
+        bboard = copy.deepcopy(board)
+        play(bboard, player, move[0], move[1])
+
+        enemy_moves = max_moves(bboard, enemy)
+
+        if len(enemy_moves) > 0:
+            enemy_move = enemy_moves[0]
+            play(bboard, enemy, enemy_move[0], enemy_move[1])
+
+        tree.append([move, minimax_smart(bboard, player, n - 1)])
+
+    return tree
 
 def algo_test(algo1, algo2, n = 50):
     """Runs a game between algo1 and algo2 n times and prints the win / loss ration for algo1"""
@@ -213,9 +233,9 @@ def algo_test(algo1, algo2, n = 50):
                 play(current_board, current_player, x, y)
                 current_player = next_player(current_player)
     if wins != n:
-        print(wins / (n - wins), str(wins / n * 100) + "%")
+        print(wins / (n - wins), str(wins / n * 100) + "% win rate")
     else:
-        print(wins)
+        print(wins, "100% win rate")
 
 # -----------------------
 # -----------------------
@@ -225,9 +245,9 @@ def main():
         display(board)
         if current_player == "●":
             # moves = max_moves(board, current_player)
-            moves = minimax_smart(board, current_player)
-        else:
             moves = minimax_moves(board, current_player)
+        else:
+            moves = minimax_smart(board, current_player)
         if moves == []:
             display(board)
             score = evaluate(board)
