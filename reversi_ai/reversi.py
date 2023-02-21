@@ -183,8 +183,8 @@ def minimax_moves(board, player):
         scores.append(evaluate(bboard))
 
     # return all the moves that we can make that will yield the lowest score for our enemy in the next move
-    indexes = map(moves.index, moves)
-    return list(map(lambda x : moves[x] if scores[x] == target_func(scores) else None, range(len(moves))))
+    score_indexes = filter(lambda x : scores[x] == target_func(scores), range(len(moves)))
+    return list(map(lambda x : moves[x], score_indexes))
 
 def minimax_smart(board, player, n = 4):
     """A recursive version of the minimax algorithm that looks
@@ -195,8 +195,12 @@ def minimax_smart(board, player, n = 4):
     moves = minimax_moves(board, player)
     print(moves)
     if n < 1:
-        print("doing", moves)
-        return moves # something
+        if len(moves) > 0:
+            bboard = copy.deepcopy(board)
+            play(bboard, player, moves[0][0], moves[0][1])
+            return (moves[0], evaluate(bboard)) # something
+        else:
+            return
 
     tree = []
     for move in moves:
@@ -209,9 +213,10 @@ def minimax_smart(board, player, n = 4):
             enemy_move = enemy_moves[0]
             play(bboard, enemy, enemy_move[0], enemy_move[1])
 
-        tree.append([move, minimax_smart(bboard, player, n - 1)])
+        tree.append([(move, evaluate(bboard)), minimax_smart(bboard, player, n - 1)])
 
-    return tree
+    moves_good = []
+    return [target_func(filter(lambda x : type(x) == tuple, tree[0]), key = lambda x : x[1])[0]]
 
 def algo_test(algo1, algo2, n = 50):
     """Runs a game between algo1 and algo2 n times and prints the win / loss ration for algo1"""
@@ -266,6 +271,7 @@ def main():
         
     
 if __name__ == "__main__":
-    print(minimax_smart(testboard, black))
+    #print(minimax_moves(testboard, black))
+    print(minimax_smart(board, black, 4))
     # main()
 
