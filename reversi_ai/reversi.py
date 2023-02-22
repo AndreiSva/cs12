@@ -98,6 +98,9 @@ def evaluate(board):
 def get_enemy(player):
     return white if player == black else black
 
+def winning(player, score):
+    return (player == black and score > 0) or (player == white and score < 0)
+
 # this function is useful because it reduces code duplication between the max_moves and minmax_moves
 def get_moves(board, player):
     """Returns a list of tuples that has all possible moves for a player,
@@ -171,16 +174,14 @@ def minimax_moves(board, player):
         # the enemy's best moves
         enemy_moves = max_moves(bboard, enemy)
 
-        # the enemy is not able to move after this turn
-        # (win for us)
-        if len(enemy_moves) == 0:
-            return [move]
-
-        enemy_move = enemy_moves[0]
+        if len(enemy_moves) > 0:
+            enemy_move = enemy_moves[0]
             
-        # play the enemy's best move
-        play(bboard, get_enemy(player), enemy_move[0], enemy_move[1])
-        scores.append(evaluate(bboard))
+            # play the enemy's best move
+            play(bboard, get_enemy(player), enemy_move[0], enemy_move[1])
+            scores.append(evaluate(bboard))
+        else:
+            scores.append(0)
 
     # return all the moves that we can make that will yield the lowest score for our enemy in the next move
     score_indexes = filter(lambda x : scores[x] == target_func(scores), range(len(moves)))
@@ -190,6 +191,8 @@ def minimax_smart(board, player, n = 4):
     """A recursive version of the minimax algorithm that looks
        up to n moves into the future. it is a bit slow"""
 
+    # this function is incomplete
+    
     enemy = get_enemy(player)
     target_func = max if enemy == black else min
     moves = minimax_moves(board, player)
@@ -270,8 +273,19 @@ def main():
             time.sleep(0.5)
         
     
-if __name__ == "__main__":
+
+def test(): 
+    board1 = [[" ", " ", " ", " ", " ", " ", " ", " "],
+          ["○", " ", " ", " ", " ", " ", " ", " "],
+          ["●", " ", " ", " ", " ", " ", " ", " "],
+          ["●", " ", " ", "●", " ", " ", " ", " "],
+          ["●", " ", "○", " ", " ", " ", " ", " "],
+          ["●", "○", " ", " ", " ", " ", " ", " "],
+          [" ", " ", " ", " ", " ", " ", " ", " "],
+          [" ", "●", "●", "●", "●", "●", "●", "○"]]
     #print(minimax_moves(testboard, black))
-    print(minimax_smart(board, black, 4))
+    print(minimax_moves(board1, white))
     # main()
 
+if __name__ == "__main__":
+    test()
