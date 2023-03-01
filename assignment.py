@@ -39,13 +39,20 @@ def is_prime(n):
 primes = []
 
 def prime_factor(n):
-    d = dict()
-    for i in range(n, 1, -1):
-        if n % i == 0:
-            if i in primes:
-                if i in d.keys():
-                    d[i] += 1
-                else:
-                    d[i] = 0
-
+    def pfactor(num):
+        print(num)
+        if num == []:
+            return None
+        
+        factors = []
+        for x in num:
+            i = 2
+            while i < x:
+                if x % i == 0:
+                    factors += pfactor([i])
+                    x //= i
+                i += 1
+        print(factors)
+        return factors
+    print(pfactor([n]))
         
