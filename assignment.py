@@ -13,12 +13,8 @@ def inventory_size(player):
 def pinata(x, y, radius, party):
     """Adds 'candy' to any player in 'party' who's x
     coordinates are inside the radius of pinata x y"""
-    players = list(map(
-        lambda player :
-            sqrt((x - player["x"])**2 - (y - player["y"])**2) <= radius,
-        party))
-    for i in range(len(players)):
-        if players[i] == True:
+    for player,i in enumerate(len(party)):
+        if sqrt((x - player["x"])**2 - (y - player["y"])**2) <= radius:
             party[i]["inventory"].append("candy")
 
 def lists_to_dict(list1, list2):
@@ -29,30 +25,31 @@ def lists_to_dict(list1, list2):
         d[list1[i]] = list2[i]
     return d
 
-def is_prime(n):
-    """Returns True if n is a prime number"""
-    for i in range(2, n - 1):
-        if n % i == 0:
-            return False
-    return True
-
 primes = []
 
+def is_prime(n):
+    """Returns True if n is a prime number"""
+    if n in primes:
+        return True
+    if n % 2 == 0 and n != 2:
+        return False
+    for i in range(3, n - 1, 2):
+        if n % i == 0:
+            return False
+        primes.append(n)
+    return True
+
 def prime_factor(n):
-    def pfactor(num):
-        print(num)
-        if num == []:
-            return None
-        
+    def __primefactor(num):
+        if len(num) == 1 and is_prime(num[0]):
+            return num
         factors = []
         for x in num:
             i = 2
             while i < x:
                 if x % i == 0:
-                    factors += pfactor([i])
-                    x //= i
+                    factors += __primefactor([i]) + __primefactor([x // i])
+                    break
                 i += 1
-        print(factors)
         return factors
-    print(pfactor([n]))
-        
+    return __primefactor([n])
