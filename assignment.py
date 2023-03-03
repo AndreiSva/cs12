@@ -40,15 +40,19 @@ def is_prime(n):
     return True
 
 def prime_factor(n):
-    """Returns """
+    """Returns a dictionary containing the prime factors of n and their
+    multiplicities"""
     def __primefactor(num):
+        # we don't have to do anything
         if len(num) == 1 and is_prime(num[0]):
             return num
         factors = []
         for x in num:
+            # we have to find factors
             i = 2
             while i < x:
                 if x % i == 0:
+                    # we recursively factor the factor and the quotient into primes
                     factors += __primefactor([i]) + __primefactor([x // i])
                     break
                 i += 1
@@ -57,6 +61,7 @@ def prime_factor(n):
     return {factor:factors.count(factor) for factor in factors}
 
 def run_tests():
+    """Runs tests on the functions provided in this file"""
     player1 = {"x": 30, "y": -15, "inventory": ["10-foot pole", "berries"]}
     assert inventory_size(player1) == 2
 
@@ -72,3 +77,6 @@ def run_tests():
     dict2 = lists_to_dict(["title", "author", "pages"],
                           ["Cat’s Cradle", "Kurt Vonnegut", 304])
     assert dict1 == dict2
+
+    assert is_prime(10) == False
+    assert is_prime(257) == True
